@@ -1,2 +1,1 @@
-# k-means-C-
-k-means C++ program
+#k-means C++ program
