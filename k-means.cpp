@@ -12,14 +12,39 @@ template<class T> inline bool chmax(T& a, T b) { if (a < b) { a = b; return 1; }
 template<class T> inline bool chmin(T& a, T b) { if (a > b) { a = b; return 1; } return 0; }
 
 
-const int CountryNum = 30, ClassNum = 4;
-vector<vector<vector<double>>> Data(ClassNum), NewData(2<<10);
+const int CountryNum = 30, ClassNum = 3;
+vector<vector<vector<double>>> Data(2<<5), NewData(2<<5);
 vector<vector<double>> Average(ClassNum, vector<double>(3,0)), NewAverage(ClassNum, vector<double>(3));
 vector<double> datamin(3,10000.0), datamax(3,-10000.0);
 vector<vector<double>> InputData;
 
-void CalcAverage(){
+
+void ShowNewCentroid(){
+    cout << "New Centroid" << endl;
+    for(auto v:NewAverage){
+        for(int i=0; i<3; i++){
+            cout << v[i] << " ";
+        }
+        cout << endl;
+    }        
+}
+
+void ShowData(){
+    cout << "Data contents" << endl;
     for(int i=0; i<ClassNum; i++){
+        cout << "Class " << i << endl;
+        for(auto v:Data[i]){
+            for(int k=0; k<v.size(); k++){
+                cout << v[k] << " ";
+            }
+            cout << endl;
+        }
+    }
+}
+
+int CalcAverage(){
+    for(int i=0; i<ClassNum; i++){
+        if(Data[i].size()==0) return 1;
         for(int k=0; k<3; k++){
             double sum = 0;
             for(auto v:Data[i]){
@@ -28,6 +53,7 @@ void CalcAverage(){
             NewAverage[i][k] = sum/Data[i].size();
         }
     }
+    return 0;
 }
 
 //calculate distance between data and centroid for each class
@@ -48,6 +74,7 @@ int ReturnMinDistClass(double x, double y, double z){
 }
 
 void ClassNewData(){
+    for(int i=0; i<ClassNum; i++) NewData[i].clear();
     for(int i=0; i<ClassNum; i++){
         for(auto v:Data[i]){
             int newclass = ReturnMinDistClass(v[1],v[2],v[3]);
@@ -58,10 +85,11 @@ void ClassNewData(){
 
 //Delete Data ans copy New class Data
 void CopyData(){
+    for(int i=0; i<ClassNum; i++) Data[i].clear();
     for(int i=0; i<ClassNum; i++){
-        Data[i].clear();
         for(auto v:NewData[i]) Data[i].push_back(v);
     }
+    ShowData();
 }
 
 //memorize average and judge is_equal
@@ -84,6 +112,7 @@ void CheckInputData(){
         cout << endl;
     }
 }
+
 
 void OutputFinalData(){
     for(int i=0; i<ClassNum; i++){
@@ -157,28 +186,19 @@ int main(){
     }
     
     GenerateFirstCentroid();
-    for(auto v:NewAverage){
-        for(int i=0; i<3; i++){
-            cout << v[i] << " ";
-        }
-        cout << endl;
-    }
-
-    // CheckInputData();
-
+    ShowNewCentroid();
 
     int step=0;
-    while(!Is_SameAverge() && step<1){
+    while(!Is_SameAverge() && step<8){
+        cout << "step" << step << "====================" << endl;
         ClassNewData();
         CopyData();
-        CalcAverage();
-        cout << "step=" << step << endl;
-        for(auto v:NewAverage){
-            for(int i=0; i<3; i++){
-                cout << v[i] << " ";
-            }
-            cout << endl;
-        }        
+        if(CalcAverage()){
+            cout << "RETRY" << endl;
+            return 0;
+        }
+        ShowNewCentroid();
+        cout << "step" << step << "end================" << endl;
         step++;
     }
 
